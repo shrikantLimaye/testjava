@@ -1,7 +1,9 @@
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -9,7 +11,7 @@ import java.util.Currency;
 
 public class DrawArea extends JPanel {
 	private ArrayList<Shape> drawList; // starts as null
-	private int startX, startY;
+	private int startX, startY, endX, endY;
 	public DrawArea() {
 		drawList = new ArrayList<Shape>(10000);	
 		drawList.add(new Circle(100,200,50));
@@ -18,17 +20,14 @@ public class DrawArea extends JPanel {
 		addMouseListener(new MouseListener() {
 			public void mouseReleased(MouseEvent e) {
 				int endX = e.getX(), endY = e.getY();
-				Graphics g = getGraphics();
 				drawList.add(new Circle(Math.min(startX,endX), Math.min(startY,endY),
 						Math.min((int)Math.abs(endX - startX), (int)Math.abs(endY - startY))/2
 						));
 				repaint();
-//				g.drawOval(Math.min(startX,endX), Math.min(startY,endY), 
-	//					(int)Math.abs(endX - startX), (int)Math.abs(endY - startY));
 		//		System.out.println(e.getX() + "," + e.getY());
 			}
 			public void mousePressed(MouseEvent e) {
-				startX = e.getX(); startY = e.getY();
+				endX = startX = e.getX(); endY = startY = e.getY();
 //				System.out.println(e.getX() + "," + e.getY());
 			}
 			
@@ -40,7 +39,23 @@ public class DrawArea extends JPanel {
 			public void mouseClicked(MouseEvent e) {
 			}
 		});
+		addMouseMotionListener(new MouseMotionListener() {
+			public void mouseMoved(MouseEvent e) {
+			}
+			public void mouseDragged(MouseEvent e) {
+				Graphics g = getGraphics();
+				g.setXORMode(Color.WHITE);
+				g.drawOval(Math.min(startX,endX), Math.min(startY,endY), 
+						(int)Math.abs(endX - startX), (int)Math.abs(endY - startY));
+
+				endX = e.getX(); endY = e.getY();
+				g.drawOval(Math.min(startX,endX), Math.min(startY,endY), 
+						(int)Math.abs(endX - startX), (int)Math.abs(endY - startY));
+				
+			}
+		});
 	}
+
 	public void paint(Graphics g) {
 		for (int i = 0; i < drawList.size(); i++) {
 			Shape s = drawList.get(i);
